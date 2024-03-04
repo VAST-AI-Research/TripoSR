@@ -25,13 +25,13 @@ Leveraging the principles of the [Large Reconstruction Model (LRM)](https://yico
 The model is released under the MIT license, which includes the source code, pretrained models, and an interactive online demo. Our goal is to empower researchers, developers, and creatives to push the boundaries of what's possible in 3D generative AI and 3D content creation.
 
 ## Getting Started
-### Install
+### Installation
 - Install PyTorch according to your platform: [https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/)
 - Install other dependencies by `pip install -r requirements.txt`
 
 ### Manual Inference
 ```sh
-python run.py path/to/image --output-dir output/
+python run.py examples/chair.png --output-dir output/
 ```
 This will save the reconstructed 3D model to `output/`. You can also specify more than one image path separated by spaces. The default options takes about **6GB VRAM** for a single image input.
 
