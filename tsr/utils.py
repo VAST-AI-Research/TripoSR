@@ -11,6 +11,7 @@ import rembg
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import trimesh
 from omegaconf import DictConfig, OmegaConf
 from PIL import Image
 
@@ -467,19 +468,8 @@ def save_video(
     writer.close()
 
 
-_dir2vec = {
-    "+x": np.array([1, 0, 0]),
-    "+y": np.array([0, 1, 0]),
-    "+z": np.array([0, 0, 1]),
-    "-x": np.array([-1, 0, 0]),
-    "-y": np.array([0, -1, 0]),
-    "-z": np.array([0, 0, -1]),
-}
-
-
-def to_gradio_3d_orientation(vertices):
-    z_, x_ = _dir2vec["+y"], _dir2vec["-z"]
-    y_ = np.cross(z_, x_)
-    std2mesh = np.stack([x_, y_, z_], axis=0).T
-    vertices = np.dot(std2mesh, vertices.T).T
-    return vertices
+def to_gradio_3d_orientation(mesh):
+    mesh.apply_transform(trimesh.transformations.rotation_matrix(-np.pi/2, [1, 0, 0]))
+    mesh.apply_scale([1, 1, -1])
+    mesh.apply_transform(trimesh.transformations.rotation_matrix(np.pi/2, [0, 1, 0]))
+    return mesh

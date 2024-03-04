@@ -54,7 +54,7 @@ def preprocess(input_image, do_remove_background, foreground_ratio):
 def generate(image):
     scene_codes = model(image, device=device)
     mesh = model.extract_mesh(scene_codes)[0]
-    mesh.vertices = to_gradio_3d_orientation(mesh.vertices)
+    mesh = to_gradio_3d_orientation(mesh)
     mesh_path = tempfile.NamedTemporaryFile(suffix=".obj", delete=False)
     mesh.export(mesh_path.name)
     return mesh_path.name
@@ -97,11 +97,6 @@ with gr.Blocks() as demo:
                 output_model = gr.Model3D(
                     label="Output Model",
                     interactive=False,
-                )
-                gr.Markdown(
-                    """
-                Note: The model shown here will be flipped due to some visualization issues. Please download to get the correct result.
-                """
                 )
     submit.click(fn=check_input_image, inputs=[input_image]).success(
         fn=preprocess,
