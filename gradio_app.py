@@ -8,6 +8,7 @@ import numpy as np
 import rembg
 import torch
 from PIL import Image
+from functools import partial
 
 from tsr.system import TSR
 from tsr.utils import remove_background, resize_foreground, to_gradio_3d_orientation
@@ -60,11 +61,22 @@ def generate(image):
     return mesh_path.name
 
 
+def run_example(image_pil):
+    preprocessed = preprocess(image_pil, False, 0.9)
+    mesh_name = generate(preprocessed)
+    return preprocessed, mesh_name
+
+
 with gr.Blocks() as demo:
     gr.Markdown(
         """
-    ## TripoSR Demo
+    # TripoSR Demo
     [TripoSR](https://github.com/VAST-AI-Research/TripoSR) is a state-of-the-art open-source model for **fast** feedforward 3D reconstruction from a single image, collaboratively developed by [Tripo AI](https://www.tripo3d.ai/) and [Stability AI](https://stability.ai/).
+    
+    **Tips:**
+    1. If you find the result is unsatisfied, please try to change the foreground ratio. It might improve the results.
+    2. You can disable "Remove Background" for the provided examples since they have been already preprocessed.
+    3. Otherwise, please disable "Remove Background" option only if your input image is RGBA with transparent background, image contents are centered and occupy more than 70% of image width or height.
     """
     )
     with gr.Row(variant="panel"):
@@ -98,6 +110,30 @@ with gr.Blocks() as demo:
                     label="Output Model",
                     interactive=False,
                 )
+    with gr.Row(variant="panel"):
+        gr.Examples(
+            examples=[
+                'examples/hamburger.png',
+                'examples/poly_fox.png',
+                'examples/robot.png',
+                'examples/teapot.png',
+                'examples/tiger_girl.png',
+                'examples/horse.png',
+                'examples/flamingo.png',
+                'examples/unicorn.png',
+                'examples/chair.png',
+                'examples/iso_house.png',
+                'examples/marble.png',
+                'examples/police_woman.png',
+                'examples/captured_p.png'
+            ],
+            inputs=[input_image],
+            outputs=[processed_image, output_model],
+            cache_examples=False,
+            fn=partial(run_example),
+            label="Examples",
+            examples_per_page=20
+        )
     submit.click(fn=check_input_image, inputs=[input_image]).success(
         fn=preprocess,
         inputs=[input_image, do_remove_background, foreground_ratio],
