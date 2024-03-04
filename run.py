@@ -51,7 +51,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--pretrained-model-name-or-path",
-    default="./",
+    default="stabilityai/TripoSR",
     type=str,
     help="Path to the pretrained model. Could be either a huggingface model id is or a local path. Default: 'stabilityai/TripoSR'",
 )
