@@ -23,6 +23,8 @@ model = TSR.from_pretrained(
     config_name="config.yaml",
     weight_name="model.ckpt",
 )
+# adjust the chunk size to balance between speed and memory usage
+model.renderer.set_chunk_size(8192)
 model.to(device)
 
 rembg_session = rembg.new_session()
@@ -113,26 +115,26 @@ with gr.Blocks() as demo:
     with gr.Row(variant="panel"):
         gr.Examples(
             examples=[
-                'examples/hamburger.png',
-                'examples/poly_fox.png',
-                'examples/robot.png',
-                'examples/teapot.png',
-                'examples/tiger_girl.png',
-                'examples/horse.png',
-                'examples/flamingo.png',
-                'examples/unicorn.png',
-                'examples/chair.png',
-                'examples/iso_house.png',
-                'examples/marble.png',
-                'examples/police_woman.png',
-                'examples/captured_p.png'
+                "examples/hamburger.png",
+                "examples/poly_fox.png",
+                "examples/robot.png",
+                "examples/teapot.png",
+                "examples/tiger_girl.png",
+                "examples/horse.png",
+                "examples/flamingo.png",
+                "examples/unicorn.png",
+                "examples/chair.png",
+                "examples/iso_house.png",
+                "examples/marble.png",
+                "examples/police_woman.png",
+                "examples/captured_p.png",
             ],
             inputs=[input_image],
             outputs=[processed_image, output_model],
             cache_examples=False,
             fn=partial(run_example),
             label="Examples",
-            examples_per_page=20
+            examples_per_page=20,
         )
     submit.click(fn=check_input_image, inputs=[input_image]).success(
         fn=preprocess,
