@@ -23,6 +23,7 @@ model = TSR.from_pretrained(
     config_name="config.yaml",
     weight_name="model.ckpt",
 )
+model.renderer.set_chunk_size(8192)
 model.to(device)
 
 rembg_session = rembg.new_session()
