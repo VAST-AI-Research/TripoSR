@@ -49,6 +49,11 @@ Start the Gradio App:
 python gradio_app.py
 ```
 
+## Troubleshooting
+> AttributeError: module 'torchmcubes_module' has no attribute 'mcubes_cuda'
+
+This may be caused by using `venv` for the Python virtual environment. Please try to build the environment with `virtualenv` instead, or use the Dockerfile provided [here](https://huggingface.co/spaces/stabilityai/TripoSR/blob/main/Dockerfile).
+
 ## Citation
 ```BibTeX
 @article{TripoSR2024,
