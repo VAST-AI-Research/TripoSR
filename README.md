@@ -27,6 +27,7 @@ The model is released under the MIT license, which includes the source code, pre
 ## Getting Started
 ### Installation
 - Python >= 3.8
+- If you want to set up a virual environment, please make sure to use `virtualenv` instead of `venv`.
 - Install PyTorch according to your platform: [https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/)
 - Install other dependencies by `pip install -r requirements.txt`
 
