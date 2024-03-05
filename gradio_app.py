@@ -23,6 +23,7 @@ model = TSR.from_pretrained(
     config_name="config.yaml",
     weight_name="model.ckpt",
 )
+
 # adjust the chunk size to balance between speed and memory usage
 model.renderer.set_chunk_size(8192)
 model.to(device)
