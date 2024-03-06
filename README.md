@@ -27,8 +27,9 @@ The model is released under the MIT license, which includes the source code, pre
 ## Getting Started
 ### Installation
 - Python >= 3.8
-- If you want to set up a virual environment, please make sure to use `virtualenv` instead of `venv`.
-- Install PyTorch according to your platform: [https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/)
+- Install CUDA if available
+- Install PyTorch according to your platform: [https://pytorch.org/get-started/locally/](https://pytorch.org/get-started/locally/) **[Please make sure that the locally-installed CUDA major version matches the PyTorch-shipped CUDA major version. For example if you have CUDA 11.x installed, make sure to install PyTorch compiled with CUDA 11.x.]**
+- Update setuptools by `pip install --upgrade setuptools`
 - Install other dependencies by `pip install -r requirements.txt`
 
 ### Manual Inference
@@ -52,11 +53,21 @@ python gradio_app.py
 ## Troubleshooting
 > AttributeError: module 'torchmcubes_module' has no attribute 'mcubes_cuda'
 
-This may be caused by using `venv` for the Python virtual environment. Please try to build the environment with `virtualenv` instead, or use the Dockerfile provided [here](https://huggingface.co/spaces/stabilityai/TripoSR/blob/main/Dockerfile).
+or
 
-Also related to different local and PyTorch CUDA versions, see [this issue](https://github.com/VAST-AI-Research/TripoSR/issues/3).
+> torchmcubes was not compiled with CUDA support, use CPU version instead.
 
-Update 2024.03.06: Will automatically fallback to CPU marching cubes when the error occurs.
+This is because `torchmcubes` is compiled without CUDA support. Please make sure that 
+
+- The locally-installed CUDA major version matches the PyTorch-shipped CUDA major version. For example if you have CUDA 11.x installed, make sure to install PyTorch compiled with CUDA 11.x.
+- `setuptools>=49.6.0`. If not, upgrade by `pip install --upgrade setuptools`.
+
+Then re-install `torchmcubes` by:
+
+```sh
+pip uninstall torchmcubes
+pip install git+https://github.com/tatsy/torchmcubes.git
+```
 
 ## Citation
 ```BibTeX
