@@ -54,6 +54,10 @@ python gradio_app.py
 
 This may be caused by using `venv` for the Python virtual environment. Please try to build the environment with `virtualenv` instead, or use the Dockerfile provided [here](https://huggingface.co/spaces/stabilityai/TripoSR/blob/main/Dockerfile).
 
+Also related to different local and PyTorch CUDA versions, see [this issue](https://github.com/VAST-AI-Research/TripoSR/issues/3).
+
+Update 2024.03.06: Will automatically fallback to CPU marching cubes when the error occurs.
+
 ## Citation
 ```BibTeX
 @article{TripoSR2024,
