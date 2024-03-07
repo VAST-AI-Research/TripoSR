@@ -38,7 +38,7 @@ python run.py examples/chair.png --output-dir output/
 ```
 This will save the reconstructed 3D model to `output/`. You can also specify more than one image path separated by spaces. The default options takes about **6GB VRAM** for a single image input.
 
-For defailed usage of this script, use `python run.py --help`.
+For detailed usage of this script, use `python run.py --help`.
 
 ### Local Gradio App
 Install Gradio:
