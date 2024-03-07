@@ -13,6 +13,9 @@ from functools import partial
 from tsr.system import TSR
 from tsr.utils import remove_background, resize_foreground, to_gradio_3d_orientation
 
+import argparse
+
+
 if torch.cuda.is_available():
     device = "cuda:0"
 else:
@@ -70,7 +73,7 @@ def run_example(image_pil):
     return preprocessed, mesh_name
 
 
-with gr.Blocks() as demo:
+with gr.Blocks(title="TripoSR") as interface:
     gr.Markdown(
         """
     # TripoSR Demo
@@ -147,5 +150,21 @@ with gr.Blocks() as demo:
         outputs=[output_model],
     )
 
-demo.queue(max_size=1)
-demo.launch()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--username', type=str, default=None, help='Username for authentication')
+    parser.add_argument('--password', type=str, default=None, help='Password for authentication')
+    parser.add_argument('--port', type=int, default=7860, help='Port to run the server listener on')
+    parser.add_argument("--listen", action='store_true', help="launch gradio with 0.0.0.0 as server name, allowing to respond to network requests")
+    parser.add_argument("--share", action='store_true', help="launch gradio with 0.0.0.0 as server name, allowing to respond to network requests")
+    parser.add_argument("--queuesize", type=int, default=1, help="launch gradio queue max_size")
+    args = parser.parse_args()
+    interface.queue(max_size=args.queuesize)
+    interface.launch(
+        auth=(args.username, args.password),
+        share=args.share,
+        server_name="0.0.0.0" if args.listen else None, 
+        server_port=args.port
+    )
