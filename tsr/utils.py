@@ -470,6 +470,5 @@ def save_video(
 
 def to_gradio_3d_orientation(mesh):
     mesh.apply_transform(trimesh.transformations.rotation_matrix(-np.pi/2, [1, 0, 0]))
-    mesh.apply_scale([1, 1, -1])
     mesh.apply_transform(trimesh.transformations.rotation_matrix(np.pi/2, [0, 1, 0]))
     return mesh

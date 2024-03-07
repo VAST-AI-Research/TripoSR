@@ -62,6 +62,12 @@ parser.add_argument(
     help="Evaluation chunk size for surface extraction and rendering. Smaller chunk size reduces VRAM usage but increases computation time. 0 for no chunking. Default: 8192",
 )
 parser.add_argument(
+    "--mc-resolution",
+    default=256,
+    type=int,
+    help="Marching cubes grid resolution. Default: 256"
+)
+parser.add_argument(
     "--no-remove-bg",
     action="store_true",
     help="If specified, the background will NOT be automatically removed from the input image, and the input image should be an RGB image with gray background and properly-sized foreground. Default: false",
@@ -151,6 +157,6 @@ for i, image in enumerate(images):
         timer.end("Rendering")
 
     timer.start("Exporting mesh")
-    meshes = model.extract_mesh(scene_codes)
+    meshes = model.extract_mesh(scene_codes, resolution=args.mc_resolution)
     meshes[0].export(os.path.join(output_dir, str(i), f"mesh.{args.model_save_format}"))
     timer.end("Exporting mesh")
