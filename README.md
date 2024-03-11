@@ -41,11 +41,6 @@ This will save the reconstructed 3D model to `output/`. You can also specify mor
 For detailed usage of this script, use `python run.py --help`.
 
 ### Local Gradio App
-Install Gradio:
-```sh
-pip install gradio
-```
-Start the Gradio App:
 ```sh
 python gradio_app.py
 ```
