@@ -84,7 +84,7 @@ with gr.Blocks(title="TripoSR") as interface:
     
     **Tips:**
     1. If you find the result is unsatisfied, please try to change the foreground ratio. It might improve the results.
-    2. You can disable "Remove Background" for the provided examples since they have been already preprocessed.
+    2. It's better to disable "Remove Background" for the provided examples (except fot the last one) since they have been already preprocessed.
     3. Otherwise, please disable "Remove Background" option only if your input image is RGBA with transparent background, image contents are centered and occupy more than 70% of image width or height.
     """
     )
@@ -148,7 +148,7 @@ with gr.Blocks(title="TripoSR") as interface:
                 "examples/iso_house.png",
                 "examples/marble.png",
                 "examples/police_woman.png",
-                "examples/captured_p.png",
+                "examples/captured.jpeg",
             ],
             inputs=[input_image],
             outputs=[processed_image, output_model_obj, output_model_glb],
