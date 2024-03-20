@@ -1,7 +1,7 @@
 omegaconf==2.3.0
 Pillow==10.1.0
 einops==0.7.0
-git+https://github.com/isl-org/torchmcubes.git@yuanxion/fix-input-numel
+git+https://github.com/tatsy/torchmcubes.git
 transformers==4.35.0
 trimesh==4.0.5
 rembg
