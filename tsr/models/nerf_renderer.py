@@ -97,15 +97,17 @@ class TriplaneNeRFRenderer(BaseModule):
         decoder: torch.nn.Module,
         positions: torch.Tensor,
         triplane: torch.Tensor,
+        scale_pos = True
     ) -> Dict[str, torch.Tensor]:
         input_shape = positions.shape[:-1]
         positions = positions.view(-1, 3)
 
         # positions in (-radius, radius)
         # normalized to (-1, 1) for grid sample
-        #positions = scale_tensor(
-        #    positions, (-self.cfg.radius, self.cfg.radius), (-1, 1)
-        #)
+        if scale_pos:
+            positions = scale_tensor(
+                positions, (-self.cfg.radius, self.cfg.radius), (-1, 1)
+            )
 
         def _query_chunk(x):
             indices2D: torch.Tensor = torch.stack(
