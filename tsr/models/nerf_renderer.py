@@ -61,8 +61,7 @@ class TriplaneNeRFRenderer(BaseModule):
         step = 2.0 * layer_count / (resolution - 1)
         indices2D = self.make_step_grid(triplane.device, resolution, layer_count)
         
-        out_list = torch.zeros([resolution, resolution * resolution, 1], device = triplane.device
-                               )
+        out_list = torch.zeros([resolution, resolution * resolution, 1]) #cpu
         for i in range(0, resolution, layer_count):
             if i + layer_count > resolution:
                 layer_count = resolution - i

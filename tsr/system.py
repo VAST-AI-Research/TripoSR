@@ -185,6 +185,7 @@ class TSR(BaseModule):
                     self.decoder.to(scene_codes.device),
                     v_pos,
                     scene_code,
+                    False
                 )["color"]
                 v_pos = scale_tensor(
                     v_pos,
