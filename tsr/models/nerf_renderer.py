@@ -112,9 +112,7 @@ class TriplaneNeRFRenderer(BaseModule):
         t_mid = (t_vals[:-1] + t_vals[1:]) / 2.0
         z_vals = t_near * (1 - t_mid[None]) + t_far * t_mid[None]  # (N_rays, N_samples)
 
-        xyz = (
-            rays_o[:, None, :] + z_vals[..., None] * rays_d[..., None, :]
-        )  # (N_rays, N_sample, 3)
+        xyz = (rays_o[rays_valid][:, None, :] + z_vals[..., None] * rays_d[rays_valid][..., None, :]) # (N_rays, N_sample, 3)
 
         mlp_out = self.query_triplane(
             decoder=decoder,
