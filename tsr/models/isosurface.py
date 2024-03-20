@@ -7,7 +7,7 @@ from torchmcubes import marching_cubes
 
 
 class IsosurfaceHelper(nn.Module):
-    points_range: Tuple[float, float] = (-1, 1)
+    points_range: Tuple[float, float] = (0, 1)
 
     @property
     def grid_vertices(self) -> torch.FloatTensor:
@@ -41,12 +41,12 @@ class MarchingCubeHelper(IsosurfaceHelper):
         self,
         level: torch.FloatTensor,
     ) -> Tuple[torch.FloatTensor, torch.LongTensor]:
-        level = level.view(self.resolution, self.resolution, self.resolution)
+        level = -level.view(self.resolution, self.resolution, self.resolution)
         try:
             v_pos, t_pos_idx = self.mc_func(level.detach(), 0.0)
         except AttributeError:
             print("torchmcubes was not compiled with CUDA support, use CPU version instead.")
             v_pos, t_pos_idx = self.mc_func(level.detach().cpu(), 0.0)
         v_pos = v_pos[..., [2, 1, 0]]
-        v_pos = v_pos * 2.0 / (self.resolution - 1.0) - 1.0
+        v_pos = v_pos / (self.resolution - 1.0)
         return v_pos.to(level.device), t_pos_idx.to(level.device)

@@ -13,7 +13,6 @@ from huggingface_hub import hf_hub_download
 from omegaconf import OmegaConf
 from PIL import Image
 
-from .models.isosurface import MarchingCubeHelper
 from .utils import (
     BaseModule,
     ImagePreprocessor,
@@ -159,14 +158,6 @@ class TSR(BaseModule):
             images.append(images_)
 
         return images
-
-    def set_marching_cubes_resolution(self, resolution: int):
-        if (
-            self.isosurface_helper is not None
-            and self.isosurface_helper.resolution == resolution
-        ):
-            return
-        self.isosurface_helper = MarchingCubeHelper(resolution)
 
     def extract_mesh(self, scene_codes, resolution: int = 256, threshold: float = 25.0):
         meshes = []
