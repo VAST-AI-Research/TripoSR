@@ -56,11 +56,11 @@ class TriplaneNeRFRenderer(BaseModule):
         indices_list = []
         color_list = []
 
-        for x in range(0, resolution, block_resolution):
+        for x in range(0, resolution - 1, block_resolution):
             size_x = resolution - x if x + block_resolution >= resolution else block_resolution + 1 # sample 1 more line of density, so marching cubes resolution match block_resolution
-            for y in range(0, resolution, block_resolution):
+            for y in range(0, resolution - 1, block_resolution):
                 size_y = resolution - y if y + block_resolution >= resolution else block_resolution + 1
-                for z in range(0, resolution, block_resolution):
+                for z in range(0, resolution - 1, block_resolution):
                     size_z = resolution - z if z + block_resolution >= resolution else block_resolution + 1
                     xyplane = interpolated[0:1, :, x:x+size_x, y:y+size_y].expand(size_z, -1, -1, -1, -1).permute(3, 4, 0, 1, 2)
                     xzplane = interpolated[1:2, :, x:x+size_x, z:z+size_z].expand(size_y, -1, -1, -1, -1).permute(3, 0, 4, 1, 2)
@@ -81,7 +81,7 @@ class TriplaneNeRFRenderer(BaseModule):
                     density = get_activation(self.cfg.density_activation)(density + self.cfg.density_bias)
 
                     # now do the marching cube
-                    v_pos, indices = marching_cubes(density.view(size_x, size_y, size_z), threshold)
+                    v_pos, indices = marching_cubes(density.view(size_x, size_y, size_z).detach(), threshold)
                     
                     #count = indices.size(0)
                     #if count == 0:
