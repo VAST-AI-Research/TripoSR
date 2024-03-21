@@ -13,7 +13,6 @@ from huggingface_hub import hf_hub_download
 from omegaconf import OmegaConf
 from PIL import Image
 
-from .models.isosurface import MarchingCubeHelper
 from .utils import (
     BaseModule,
     ImagePreprocessor,
@@ -160,44 +159,25 @@ class TSR(BaseModule):
 
         return images
 
-    def set_marching_cubes_resolution(self, resolution: int):
-        if (
-            self.isosurface_helper is not None
-            and self.isosurface_helper.resolution == resolution
-        ):
-            return
-        self.isosurface_helper = MarchingCubeHelper(resolution)
-
     def extract_mesh(self, scene_codes, resolution: int = 256, threshold: float = 25.0):
-        self.set_marching_cubes_resolution(resolution)
         meshes = []
         for scene_code in scene_codes:
             with torch.no_grad():
-                density = self.renderer.query_triplane(
-                    self.decoder,
-                    scale_tensor(
-                        self.isosurface_helper.grid_vertices.to(scene_codes.device),
-                        self.isosurface_helper.points_range,
-                        (-self.renderer.cfg.radius, self.renderer.cfg.radius),
-                    ),
+                v_pos, t_pos_idx = self.renderer.block_based_marchingcube(self.decoder.to(scene_codes.device),
                     scene_code,
-                )["density_act"]
-            v_pos, t_pos_idx = self.isosurface_helper(-(density - threshold))
-            v_pos = scale_tensor(
-                v_pos,
-                self.isosurface_helper.points_range,
-                (-self.renderer.cfg.radius, self.renderer.cfg.radius),
-            )
-            with torch.no_grad():
-                color = self.renderer.query_triplane(
-                    self.decoder,
+                    resolution,
+                    threshold
+                    )
+                color = self.renderer.query_triplane(self.decoder.to(scene_codes.device), v_pos.to(scene_codes.device), scene_code, False)["color"]
+                v_pos = scale_tensor(
                     v_pos,
-                    scene_code,
-                )["color"]
-            mesh = trimesh.Trimesh(
-                vertices=v_pos.cpu().numpy(),
-                faces=t_pos_idx.cpu().numpy(),
-                vertex_colors=color.cpu().numpy(),
-            )
-            meshes.append(mesh)
+                    (-1.0, 1.0),
+                    (-self.renderer.cfg.radius, self.renderer.cfg.radius)
+                )
+                mesh = trimesh.Trimesh(
+                    vertices=v_pos.cpu().numpy(),
+                    faces=t_pos_idx.cpu().numpy(),
+                    vertex_colors=color.cpu().numpy(),
+                )
+                meshes.append(mesh)
         return meshes

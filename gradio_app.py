@@ -114,7 +114,7 @@ with gr.Blocks(title="TripoSR") as interface:
                     mc_resolution = gr.Slider(
                         label="Marching Cubes Resolution",
                         minimum=32,
-                        maximum=320,
+                        maximum=1024,
                         value=256,
                         step=32
                     )
