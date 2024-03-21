@@ -163,11 +163,12 @@ class TSR(BaseModule):
         meshes = []
         for scene_code in scene_codes:
             with torch.no_grad():
-                v_pos, color, t_pos_idx = self.renderer.block_based_marchingcube(self.decoder.to(scene_codes.device),
+                v_pos, t_pos_idx = self.renderer.block_based_marchingcube(self.decoder.to(scene_codes.device),
                     scene_code,
                     resolution,
                     threshold
                     )
+                color = self.renderer.query_triplane(self.decoder.to(scene_codes.device), v_pos.to(scene_codes.device), scene_code, False)["color"]
                 v_pos = scale_tensor(
                     v_pos,
                     (-1.0, 1.0),

@@ -54,8 +54,6 @@ class TriplaneNeRFRenderer(BaseModule):
 
         pos_list = []
         indices_list = []
-        color_list = []
-
         for x in range(0, resolution - 1, block_resolution):
             size_x = resolution - x if x + block_resolution >= resolution else block_resolution + 1 # sample 1 more line of density, so marching cubes resolution match block_resolution
             for y in range(0, resolution - 1, block_resolution):
@@ -78,27 +76,24 @@ class TriplaneNeRFRenderer(BaseModule):
                     out = None # discard samples
                     density = net_out["density"]
                     net_out = None # discard colors
-                    density = get_activation(self.cfg.density_activation)(density + self.cfg.density_bias)
-
-                    # now do the marching cube
-                    v_pos, indices = marching_cubes(density.view(size_x, size_y, size_z).detach(), threshold)
-                    
-                    #count = indices.size(0)
-                    #if count == 0:
-                    #    continue
+                    density = get_activation(self.cfg.density_activation)(density + self.cfg.density_bias).view(size_x, size_y, size_z)
+                    try: # now do the marching cube
+                        v_pos, indices = marching_cubes(density.detach(), threshold)
+                    except AttributeError:
+                        print("torchmcubes was not compiled with CUDA support, use CPU version instead.")
+                        v_pos, indices = self.mc_func(density.detach().cpu(), 0.0)
                     offset = torch.tensor([x * voxel_size - 1.0, y * voxel_size - 1.0, z * voxel_size - 1.0], device = triplane.device)
                     v_pos = v_pos[..., [2, 1, 0]] * voxel_size + offset
-                    v_color = self.query_triplane(decoder, v_pos, triplane, False)["color"]
+                    
                     indices_list.append(indices)
                     pos_list.append(v_pos)
-                    color_list.append(v_color)
-        
+                    
         vertex_count = 0
         for i in range(0, len(pos_list)):
             indices_list[i] += vertex_count
             vertex_count += pos_list[i].size(0)
-
-        return torch.cat(pos_list), torch.cat(color_list), torch.cat(indices_list)
+        
+        return torch.cat(pos_list), torch.cat(indices_list)
 
     def query_triplane(
         self,
