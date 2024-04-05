@@ -24,7 +24,7 @@ class Timer:
         self.items[name] = time.time()
         logging.info(f"{name} ...")
 
-    def end(self, name: str) -> float:
+    def end(self, name: str) -> None:
         if name not in self.items:
             return
         if torch.cuda.is_available():
