@@ -168,7 +168,7 @@ class TSR(BaseModule):
             return
         self.isosurface_helper = MarchingCubeHelper(resolution)
 
-    def extract_mesh(self, scene_codes, resolution: int = 256, threshold: float = 25.0):
+    def extract_mesh(self, scene_codes, has_vertex_color, resolution: int = 256, threshold: float = 25.0):
         self.set_marching_cubes_resolution(resolution)
         meshes = []
         for scene_code in scene_codes:
@@ -188,16 +188,18 @@ class TSR(BaseModule):
                 self.isosurface_helper.points_range,
                 (-self.renderer.cfg.radius, self.renderer.cfg.radius),
             )
-            with torch.no_grad():
-                color = self.renderer.query_triplane(
-                    self.decoder,
-                    v_pos,
-                    scene_code,
-                )["color"]
+            color = None
+            if has_vertex_color:
+                with torch.no_grad():
+                    color = self.renderer.query_triplane(
+                        self.decoder,
+                        v_pos,
+                        scene_code,
+                    )["color"]
             mesh = trimesh.Trimesh(
                 vertices=v_pos.cpu().numpy(),
                 faces=t_pos_idx.cpu().numpy(),
-                vertex_colors=color.cpu().numpy(),
+                vertex_colors=color.cpu().numpy() if has_vertex_color else None,
             )
             meshes.append(mesh)
         return meshes
