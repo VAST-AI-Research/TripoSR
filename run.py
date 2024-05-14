@@ -6,10 +6,12 @@ import time
 import numpy as np
 import rembg
 import torch
+import xatlas
 from PIL import Image
 
 from tsr.system import TSR
 from tsr.utils import remove_background, resize_foreground, save_video
+from tsr.bake_texture import bake_texture
 
 
 class Timer:
@@ -92,6 +94,17 @@ parser.add_argument(
     help="Format to save the extracted mesh. Default: 'obj'",
 )
 parser.add_argument(
+    "--bake-texture",
+    action="store_true",
+    help="Bake a texture atlas for the extracted mesh, instead of vertex colors",
+)
+parser.add_argument(
+    "--texture-resolution",
+    default=2048,
+    type=int,
+    help="Texture atlas resolution, only useful with --bake-texture. Default: 2048"
+)
+parser.add_argument(
     "--render",
     action="store_true",
     help="If specified, save a NeRF-rendered video. Default: false",
@@ -156,7 +169,23 @@ for i, image in enumerate(images):
         )
         timer.end("Rendering")
 
-    timer.start("Exporting mesh")
-    meshes = model.extract_mesh(scene_codes, resolution=args.mc_resolution)
-    meshes[0].export(os.path.join(output_dir, str(i), f"mesh.{args.model_save_format}"))
-    timer.end("Exporting mesh")
+    timer.start("Extracting mesh")
+    meshes = model.extract_mesh(scene_codes, not args.bake_texture, resolution=args.mc_resolution)
+    timer.end("Extracting mesh")
+
+    out_mesh_path = os.path.join(output_dir, str(i), f"mesh.{args.model_save_format}")
+    if args.bake_texture:
+        out_texture_path = os.path.join(output_dir, str(i), "texture.png")
+
+        timer.start("Baking texture")
+        bake_output = bake_texture(meshes[0], model, scene_codes[0], args.texture_resolution)
+        timer.end("Baking texture")
+
+        timer.start("Exporting mesh and texture")
+        xatlas.export(out_mesh_path, meshes[0].vertices[bake_output["vmapping"]], bake_output["indices"], bake_output["uvs"], meshes[0].vertex_normals[bake_output["vmapping"]])
+        Image.fromarray((bake_output["colors"] * 255.0).astype(np.uint8)).transpose(Image.FLIP_TOP_BOTTOM).save(out_texture_path)
+        timer.end("Exporting mesh and texture")
+    else:
+        timer.start("Exporting mesh")
+        meshes[0].export(out_mesh_path)
+        timer.end("Exporting mesh")

@@ -60,7 +60,7 @@ def preprocess(input_image, do_remove_background, foreground_ratio):
 
 def generate(image, mc_resolution, formats=["obj", "glb"]):
     scene_codes = model(image, device=device)
-    mesh = model.extract_mesh(scene_codes, resolution=mc_resolution)[0]
+    mesh = model.extract_mesh(scene_codes, True, resolution=mc_resolution)[0]
     mesh = to_gradio_3d_orientation(mesh)
     rv = []
     for format in formats:
