@@ -47,6 +47,17 @@ For detailed usage of this script, use `python run.py --help`.
 python gradio_app.py
 ```
 
+### Local FastAPI App
+Install FastAPI:
+```sh
+pip install fastapi uvicorn python-multipart
+```
+Start the FastAPI
+```sh
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+```
+For more comprehensive information about sending requests and features, please refer to the detailed [tutorial](doc/README_app.md).
+
 ## Troubleshooting
 > AttributeError: module 'torchmcubes_module' has no attribute 'mcubes_cuda'
 
