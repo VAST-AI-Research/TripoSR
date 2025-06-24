@@ -135,7 +135,12 @@ def rasterize_position_atlas(
 
 
 def positions_to_colors(model, scene_code, positions_texture, texture_resolution):
-    positions = torch.tensor(positions_texture.reshape(-1, 4)[:, :-1])
+    positions = torch.tensor(
+       positions_texture.reshape(-1, 4)[:, :-1],
+        dtype=torch.float32,
+        device=scene_code.device,
+    )
+
     with torch.no_grad():
         queried_grid = model.renderer.query_triplane(
             model.decoder,
