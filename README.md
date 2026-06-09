@@ -68,6 +68,8 @@ pip uninstall torchmcubes
 pip install git+https://github.com/tatsy/torchmcubes.git
 ```
 
+Check this Fast API Service: https://github.com/roma2023/TripoSR
+
 ## Citation
 ```BibTeX
 @article{TripoSR2024,
