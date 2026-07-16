@@ -49,7 +49,7 @@ parser.add_argument(
     "--device",
     default="cuda:0",
     type=str,
-    help="Device to use. If no CUDA-compatible device is found, will fallback to 'cpu'. Default: 'cuda:0'",
+    help="Device to use ('cuda:0', 'xpu' for Intel GPUs, or 'cpu'). Falls back to 'cpu' if the requested accelerator is unavailable. Default: 'cuda:0'",
 )
 parser.add_argument(
     "--pretrained-model-name-or-path",
@@ -115,7 +115,13 @@ output_dir = args.output_dir
 os.makedirs(output_dir, exist_ok=True)
 
 device = args.device
-if not torch.cuda.is_available():
+# Support Intel GPUs via PyTorch's native XPU backend (torch>=2.5, `torch+xpu`
+# build) in addition to CUDA, falling back to CPU when the requested accelerator
+# is unavailable.
+if device.startswith("cuda") and not torch.cuda.is_available():
+    device = "cpu"
+elif device == "xpu" and not (hasattr(torch, "xpu") and torch.xpu.is_available()):
+    logging.warning("xpu requested but no XPU device is available; falling back to cpu")
     device = "cpu"
 
 timer.start("Initializing model")

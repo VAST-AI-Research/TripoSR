@@ -3,7 +3,24 @@ from typing import Callable, Optional, Tuple
 import numpy as np
 import torch
 import torch.nn as nn
-from torchmcubes import marching_cubes
+
+try:
+    from torchmcubes import marching_cubes
+except ImportError:
+    # Fallback to PyMCubes (`pip install PyMCubes`) when torchmcubes is not
+    # installed. torchmcubes requires compiling a native (CUDA) extension, which
+    # is not available on many setups (CPU-only, Intel XPU, Apple MPS, ...).
+    # PyMCubes ships prebuilt CPU wheels and returns an equivalent surface.
+    import mcubes as _mcubes
+
+    def marching_cubes(volume, threshold):
+        verts, faces = _mcubes.marching_cubes(
+            volume.detach().cpu().numpy().astype(np.float32), float(threshold)
+        )
+        return (
+            torch.from_numpy(np.ascontiguousarray(verts)).float(),
+            torch.from_numpy(np.ascontiguousarray(faces)).long(),
+        )
 
 
 class IsosurfaceHelper(nn.Module):
