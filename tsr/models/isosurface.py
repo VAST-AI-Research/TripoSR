@@ -42,11 +42,13 @@ class MarchingCubeHelper(IsosurfaceHelper):
         level: torch.FloatTensor,
     ) -> Tuple[torch.FloatTensor, torch.LongTensor]:
         level = -level.view(self.resolution, self.resolution, self.resolution)
+        # torchmcubes CPU build requires a CPU tensor (also for MPS tensors on Apple Silicon).
+        level_cpu = level.detach().cpu().contiguous()
         try:
-            v_pos, t_pos_idx = self.mc_func(level.detach(), 0.0)
-        except AttributeError:
-            print("torchmcubes was not compiled with CUDA support, use CPU version instead.")
-            v_pos, t_pos_idx = self.mc_func(level.detach().cpu(), 0.0)
+            v_pos, t_pos_idx = self.mc_func(level_cpu, 0.0)
+        except Exception:
+            print("torchmcubes marching_cubes failed on first attempt; retrying on CPU float32.")
+            v_pos, t_pos_idx = self.mc_func(level_cpu.float(), 0.0)
         v_pos = v_pos[..., [2, 1, 0]]
         v_pos = v_pos / (self.resolution - 1.0)
         return v_pos.to(level.device), t_pos_idx.to(level.device)
