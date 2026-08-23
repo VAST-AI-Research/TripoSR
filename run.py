@@ -49,7 +49,7 @@ parser.add_argument(
     "--device",
     default="cuda:0",
     type=str,
-    help="Device to use. If no CUDA-compatible device is found, will fallback to 'cpu'. Default: 'cuda:0'",
+    help="Device to use. The default falls back from CUDA to Apple MPS, then CPU. Default: 'cuda:0'",
 )
 parser.add_argument(
     "--pretrained-model-name-or-path",
@@ -115,8 +115,20 @@ output_dir = args.output_dir
 os.makedirs(output_dir, exist_ok=True)
 
 device = args.device
-if not torch.cuda.is_available():
+# Prefer CUDA, then Apple MPS, else CPU. Honor explicit --device when possible.
+if device.startswith("cuda") and not torch.cuda.is_available():
+    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        device = "mps"
+        logging.info("CUDA unavailable; using Apple MPS.")
+    else:
+        device = "cpu"
+        logging.info("CUDA unavailable; using CPU.")
+elif device.startswith("mps") and not (
+    hasattr(torch.backends, "mps") and torch.backends.mps.is_available()
+):
     device = "cpu"
+    logging.info("MPS unavailable; using CPU.")
+logging.info(f"Using device: {device}")
 
 timer.start("Initializing model")
 model = TSR.from_pretrained(
@@ -152,6 +164,7 @@ for i, image_path in enumerate(args.image):
 timer.end("Processing images")
 
 for i, image in enumerate(images):
+    os.makedirs(os.path.join(output_dir, str(i)), exist_ok=True)
     logging.info(f"Running image {i + 1}/{len(images)} ...")
 
     timer.start("Running model")

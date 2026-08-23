@@ -42,11 +42,24 @@ class MarchingCubeHelper(IsosurfaceHelper):
         level: torch.FloatTensor,
     ) -> Tuple[torch.FloatTensor, torch.LongTensor]:
         level = -level.view(self.resolution, self.resolution, self.resolution)
-        try:
-            v_pos, t_pos_idx = self.mc_func(level.detach(), 0.0)
-        except AttributeError:
-            print("torchmcubes was not compiled with CUDA support, use CPU version instead.")
-            v_pos, t_pos_idx = self.mc_func(level.detach().cpu(), 0.0)
+        if level.device.type == "cuda":
+            try:
+                v_pos, t_pos_idx = self.mc_func(level.detach(), 0.0)
+            except AttributeError:
+                print(
+                    "torchmcubes was not compiled with CUDA support; "
+                    "using its CPU implementation instead."
+                )
+                level_cpu = level.detach().to(
+                    device="cpu", dtype=torch.float32
+                ).contiguous()
+                v_pos, t_pos_idx = self.mc_func(level_cpu, 0.0)
+        else:
+            # torchmcubes has no MPS implementation, so extract the surface on CPU.
+            level_cpu = level.detach().to(
+                device="cpu", dtype=torch.float32
+            ).contiguous()
+            v_pos, t_pos_idx = self.mc_func(level_cpu, 0.0)
         v_pos = v_pos[..., [2, 1, 0]]
         v_pos = v_pos / (self.resolution - 1.0)
         return v_pos.to(level.device), t_pos_idx.to(level.device)
