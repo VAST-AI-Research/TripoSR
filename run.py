@@ -49,7 +49,7 @@ parser.add_argument(
     "--device",
     default="cuda:0",
     type=str,
-    help="Device to use. If no CUDA-compatible device is found, will fallback to 'cpu'. Default: 'cuda:0'",
+    help="Device to use. The default falls back from CUDA to Apple MPS, then CPU. Default: 'cuda:0'",
 )
 parser.add_argument(
     "--pretrained-model-name-or-path",
@@ -123,7 +123,9 @@ if device.startswith("cuda") and not torch.cuda.is_available():
     else:
         device = "cpu"
         logging.info("CUDA unavailable; using CPU.")
-elif device == "mps" and not (hasattr(torch.backends, "mps") and torch.backends.mps.is_available()):
+elif device.startswith("mps") and not (
+    hasattr(torch.backends, "mps") and torch.backends.mps.is_available()
+):
     device = "cpu"
     logging.info("MPS unavailable; using CPU.")
 logging.info(f"Using device: {device}")
